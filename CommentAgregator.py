@@ -1,14 +1,18 @@
 import os
 import json
+import sys, codecs
 import googleapiclient.discovery
 from urllib.parse import urlparse
 
+#
+#   Fix the character encoding problem, does not save emoji's to file.
+#
 
-def main():
+def main(saveOption):
     response, nextPageToken = apiRequest()
-    # dumpAllComments(response,nextPageToken)
+    dumpAllComments(response,nextPageToken,saveOption)
 
-    parsePrintJSON(response)
+    # parsePrintJSON(response)
 
 
 def parsePrintJSON(response, level=0):
@@ -25,23 +29,37 @@ def parsePrintJSON(response, level=0):
             print("\t" * (level + 1) + str(response[key]))
 
 
-def parseJSONComments(response, level=0):
+def dumpAllComments(response="", nextPageToken="",saveOption = False):
+    global comCount
+    comCount = 0
+
+    if saveOption:
+        file = open("comments.txt", 'a')
+        file.close()
+    parseJSONComments(response, saveOption = saveOption)
+    while nextPageToken is not None:
+        response,nextPageToken = apiRequest(nextPageToken)
+        parseJSONComments(response,saveOption = saveOption)
+    print("Done, wrote", comCount, "Comments")
+
+
+def parseJSONComments(response, level=0, saveOption = False):
     for key in response:
         if key == "textDisplay":
             print(response[key])
+            global comCount
+            comCount += 1
+            if saveOption:
+                with open ('comments.txt', 'a') as file:
+                    try:
+                        file.write(response[key])
+                    except:
+                        file.write("FAILED ATTEMPT AT COMMENT DUMP~")
         if type(response[key]) == dict:
-            parseJSONComments(response[key], level + 1)
+            parseJSONComments(response[key], level + 1, saveOption)
         elif type(response[key]) == list or type(response[key]) == tuple:
             for item in response[key]:
-                parseJSONComments(item, level + 1)
-
-
-def dumpAllComments(response="", nextPageToken=""):
-    parseJSONComments(response)
-    while nextPageToken is not None:
-        response,nextPageToken = apiRequest(nextPageToken)
-        parseJSONComments(response)
-    print("Done.")
+                parseJSONComments(item, level + 1, saveOption)
 
 
 def configFileSeek(searchString):
@@ -83,9 +101,17 @@ def apiRequest(PageToken=""):
         return response, None
 
 
+def saveOption():
+    saveOption = str(input("Would you like to save the video?(y/n)"))
+    if saveOption == 'Y' or saveOption == 'y':
+        saveOption == True
+    else:
+        saveOption == False
+    return saveOption
 
 if __name__ == "__main__":
     link = input("Please enter the video Id you are searching for.")
+    saveOption = saveOption()
     Vid = extractVID(link)
 
-    main()
+    main(saveOption)
