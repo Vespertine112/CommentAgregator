@@ -4,13 +4,14 @@ import sys, codecs
 import googleapiclient.discovery
 from urllib.parse import urlparse
 
+
 #
 #   Fix the character encoding problem, does not save emoji's to file.
 #
 
 def main(saveOption):
     response, nextPageToken = apiRequest()
-    dumpAllComments(response,nextPageToken,saveOption)
+    dumpAllComments(response, nextPageToken, saveOption)
 
     # parsePrintJSON(response)
 
@@ -29,32 +30,35 @@ def parsePrintJSON(response, level=0):
             print("\t" * (level + 1) + str(response[key]))
 
 
-def dumpAllComments(response="", nextPageToken="",saveOption = False):
+def dumpAllComments(response="", nextPageToken="", saveOption=False):
     global comCount
     comCount = 0
 
     if saveOption:
         file = open("comments.txt", 'a')
         file.close()
-    parseJSONComments(response, saveOption = saveOption)
+    parseJSONComments(response, saveOption=saveOption)
     while nextPageToken is not None:
-        response,nextPageToken = apiRequest(nextPageToken)
-        parseJSONComments(response,saveOption = saveOption)
+        response, nextPageToken = apiRequest(nextPageToken)
+        parseJSONComments(response, saveOption=saveOption)
     print("Done, wrote", comCount, "Comments")
 
 
-def parseJSONComments(response, level=0, saveOption = False):
+def parseJSONComments(response, level=0, saveOption=False):
     for key in response:
         if key == "textDisplay":
-            print(response[key])
+            text = response[key]
+        if key == "likeCount":
+            likeCount = response[key]
             global comCount
             comCount += 1
+            print(likeCount, ":",text)
             if saveOption:
-                with open ('comments.txt', 'a') as file:
+                with open('comments.txt', 'a') as file:
                     try:
-                        file.write(response[key])
+                        file.write(str(likeCount)+ " : "+ text + "\n")
                     except:
-                        file.write("FAILED ATTEMPT AT COMMENT DUMP~")
+                        file.write("~FAILED ATTEMPT AT COMMENT DUMP~\n")
         if type(response[key]) == dict:
             parseJSONComments(response[key], level + 1, saveOption)
         elif type(response[key]) == list or type(response[key]) == tuple:
@@ -108,6 +112,7 @@ def saveOption():
     else:
         saveOption == False
     return saveOption
+
 
 if __name__ == "__main__":
     link = input("Please enter the video Id you are searching for.")
