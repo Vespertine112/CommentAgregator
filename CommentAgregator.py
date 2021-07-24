@@ -3,13 +3,27 @@ import json
 import sys, codecs
 import googleapiclient.discovery
 from urllib.parse import urlparse
+import extractionFactory
+
+
+# # Things to allow for Api extraction:
+# 1. VideoId
+# 2. textDisplay
+# 3. textOriginal
+# 4. authorDisplayName
+# 5. authorChannelUrl
+# 6. authorChannelId
+# 7. canRate
+# 8. likeCount
+# 9. publishedAt
+# 10. updatedAt
 
 
 def main(saveOption):
     response, nextPageToken = apiRequest()
-    dumpAllComments(response, nextPageToken, saveOption)
+    # dumpAllComments(response, nextPageToken, saveOption)
 
-    # parsePrintJSON(response)
+    parsePrintJSON(response)
 
 
 def parsePrintJSON(response, level=0):
