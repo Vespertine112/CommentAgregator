@@ -5,10 +5,6 @@ import googleapiclient.discovery
 from urllib.parse import urlparse
 
 
-#
-#   Fix the character encoding problem, does not save emoji's to file.
-#
-
 def main(saveOption):
     response, nextPageToken = apiRequest()
     dumpAllComments(response, nextPageToken, saveOption)
@@ -22,12 +18,18 @@ def parsePrintJSON(response, level=0):
         if type(response[key]) == dict:
             parsePrintJSON(response[key], level + 1)
         elif type(response[key]) == str:
-            print("\t" * (level + 1) + response[key])
+            try:
+                print("\t" * (level + 1) + str(response[key]))
+            except UnicodeEncodeError:
+                print("\t" * (level + 1) + str(response[key].encode('utf-8')))
         elif type(response[key]) == list or type(response[key]) == tuple:
             for item in response[key]:
                 parsePrintJSON(item, level + 1)
         elif type(response[key]) != str:
-            print("\t" * (level + 1) + str(response[key]))
+            try:
+                print("\t" * (level + 1) + str(response[key]))
+            except UnicodeEncodeError:
+                print("\t" * (level + 1) + str(response[key].encode('utf-8')))
 
 
 def dumpAllComments(response="", nextPageToken="", saveOption=False):
@@ -52,11 +54,16 @@ def parseJSONComments(response, level=0, saveOption=False):
             likeCount = response[key]
             global comCount
             comCount += 1
-            print(likeCount, ":",text)
+            try:
+                print(likeCount, ":", text)
+            except UnicodeEncodeError:
+                print(likeCount, ":", text.encode("utf-8"))
             if saveOption:
                 with open('comments.txt', 'a') as file:
                     try:
-                        file.write(str(likeCount)+ " : "+ text + "\n")
+                        file.write(str(likeCount) + " : " + text + "\n")
+                    except(UnicodeEncodeError):
+                        file.write((str(likeCount) + " : " + text.encode('utf-8') + "\n"))
                     except:
                         file.write("~FAILED ATTEMPT AT COMMENT DUMP~\n")
         if type(response[key]) == dict:
@@ -108,9 +115,9 @@ def apiRequest(PageToken=""):
 def saveOption():
     saveOption = str(input("Would you like to save the video?(y/n)"))
     if saveOption == 'Y' or saveOption == 'y':
-        saveOption == True
+        saveOption = True
     else:
-        saveOption == False
+        saveOption = False
     return saveOption
 
 
