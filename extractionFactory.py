@@ -1,7 +1,5 @@
 import json, CommentAgregator
-
-
-# Move all logic for JSON extraction here.
+# All logic for JSON extraction here.
 
 def parsePrintJSON(response, level=0):
     for key in response:
@@ -21,8 +19,6 @@ def parsePrintJSON(response, level=0):
                 print("\t" * (level + 1) + str(response[key]))
             except UnicodeEncodeError:
                 print("\t" * (level + 1) + str(response[key].encode('utf-8')))
-
-
 # parsePrintJSON shows the formatting of the JSON from YT API in raw form.
 
 
@@ -38,9 +34,8 @@ def dumpAllComments(response="", nextPageToken="", saveOption=False):
         response, nextPageToken = CommentAgregator.apiRequest(nextPageToken)
         parseJSONComments(response, saveOption=saveOption)
     print("Done, wrote", comCount, "Comments")
-
-
 # dumpAllComments dumps all the comments to console or to a file in a standard form... for now
+
 
 # # Things to allow for Api extraction:
 # 1. VideoId
@@ -59,7 +54,23 @@ def parseJSON(response):
             videoId = response[key]
         if key == "textDisplay":
             textDisplay = response[key]
-        
+        if key == "textOriginal":
+            textOriginal = response[key]
+        if key == "authorDisplayName":
+            authorDisplayName = response[key]
+        if key == "authorChannelUrl":
+            authorChannelUrl = response[key]
+        if key == "authorChannelId":
+            authorChannelId = response[key]
+        if key == "canRate":
+            canRate = response[key]
+        if key == "likeCount":
+            likeCount = response[key]
+        if key == "publishedAt":
+            publishedAt = response[key]
+        if key == "updatedAt":
+            updatedAt = response[key]
+            print(videoId,textDisplay,textOriginal,authorDisplayName,authorChannelUrl,authorChannelId,canRate,likeCount,publishedAt,updatedAt)
 
         if type(response[key]) == dict:
             parseJSON(response[key])
@@ -93,8 +104,6 @@ def parseJSONComments(response, level=0, saveOption=False):
         elif type(response[key]) == list or type(response[key]) == tuple:
             for item in response[key]:
                 parseJSONComments(item, level + 1, saveOption)
-
-
 # parseJSONComments is a helper function for dumpAllComments
 
 

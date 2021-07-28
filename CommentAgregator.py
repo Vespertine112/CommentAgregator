@@ -3,22 +3,11 @@ import json
 import sys, codecs
 import googleapiclient.discovery
 from urllib.parse import urlparse
+from urllib.request import urlopen
 import extractionFactory
 
 
 # @author: Brayden Hill, hillbgh@gmail.com
-
-# # Things to allow for Api extraction:
-# 1. VideoId
-# 2. textDisplay
-# 3. textOriginal
-# 4. authorDisplayName
-# 5. authorChannelUrl
-# 6. authorChannelId
-# 7. canRate
-# 8. likeCount
-# 9. publishedAt
-# 10. updatedAt
 
 
 def main(saveOption):
@@ -63,12 +52,16 @@ def apiRequest(PageToken=""):
 # sends a request to the api, returns a response
 
 
-def saveOption():
+def saveOption(link):
     saveOption = str(input("Would you like to save the video?(y/n)"))
     if saveOption == 'Y' or saveOption == 'y':
         saveOption = True
     else:
         saveOption = False
+    if saveOption:
+        response = urlopen(link)
+        rawData = response.read()
+        print(rawData)
 
     return saveOption
 
@@ -77,7 +70,7 @@ def saveOption():
 
 if __name__ == "__main__":
     link = input("Please enter the video Id you are searching for.")
-    saveOption = saveOption()
+    saveOption = saveOption(link)
     Vid = extractVID(link)
 
-    main(saveOption)
+    # main(saveOption)
