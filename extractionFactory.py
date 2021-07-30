@@ -22,18 +22,21 @@ def parsePrintJSON(response, level=0):
 # parsePrintJSON shows the formatting of the JSON from YT API in raw form.
 
 
-def dumpAllComments(response="", nextPageToken="", saveOption=False):
+def dumpAllComments(response="", nextPageToken="", saveOption=False, title="No_title_found!",Vid=""):
     global comCount
     comCount = 0
 
     if saveOption:
-        file = open("comments.txt", 'a')
-        file.close()
-    parseJSONComments(response, saveOption=saveOption)
+        file = open(title + ".txt", 'a')
+
+    parseJSONComments(response, title, saveOption)
     while nextPageToken is not None:
-        response, nextPageToken = CommentAgregator.apiRequest(nextPageToken)
-        parseJSONComments(response, saveOption=saveOption)
-    print("Done, wrote", comCount, "Comments")
+        response, nextPageToken = CommentAgregator.apiRequest(nextPageToken,Vid)
+        parseJSONComments(response, title, saveOption)
+        print("Done, wrote", comCount, "Comments")
+    if saveOption:
+        file.close()
+
 # dumpAllComments dumps all the comments to console or to a file in a standard form... for now
 
 
@@ -79,7 +82,7 @@ def parseJSON(response):
                 parseJSON(item)
 
 
-def parseJSONComments(response, level=0, saveOption=False):
+def parseJSONComments(response, title, saveOption, level=0):
     for key in response:
         if key == "textDisplay":
             text = response[key]
@@ -92,18 +95,18 @@ def parseJSONComments(response, level=0, saveOption=False):
             except UnicodeEncodeError:
                 print(likeCount, ":", text.encode("utf-8"))
             if saveOption:
-                with open('comments.txt', 'a') as file:
+                with open(title + ".txt", 'a') as file:
                     try:
                         file.write(str(likeCount) + " : " + text + "\n")
                     except(UnicodeEncodeError):
-                        file.write((str(likeCount) + " : " + text.encode('utf-8') + "\n"))
+                        file.write((str(likeCount) + " : " + str(text.encode('utf-8')) + "\n"))
                     except:
                         file.write("~FAILED ATTEMPT AT COMMENT DUMP~\n")
         if type(response[key]) == dict:
-            parseJSONComments(response[key], level + 1, saveOption)
+            parseJSONComments(response[key],title,saveOption, level + 1)
         elif type(response[key]) == list or type(response[key]) == tuple:
             for item in response[key]:
-                parseJSONComments(item, level + 1, saveOption)
+                parseJSONComments(item,title,saveOption, level + 1)
 # parseJSONComments is a helper function for dumpAllComments
 
 
